@@ -8,12 +8,13 @@ from __future__ import print_function
 
 from itertools import count
 from Queue import Queue
+from collections import defaultdict
 
 import heapq
 
 class Graph(object):
     """
-    定义图的数据结构（使用邻接表存储），并且实现对图的各种操作（拓扑排序）
+    定义图的数据结构（使用邻接表存储），并且实现对图的各种操作（拓扑排序、几种最短路径的实现）
     """
     
     def __init__(self, edge_pairs):
@@ -154,9 +155,42 @@ class Graph(object):
                                                                          records[index][_len_posi]))
             print(path)
             
-    def weightedShortPath(self, vertex_name):
+    def neWeightedShortPath(self, vertex_name):
         """
-        计算指定源顶点到图中所有其它顶点的有权最短路径（无负权值）（Dijkstra的优先队列实现）
+        计算制定源点到图中所有其它定点的加权最短路径（有负值权，但无负值圈）
+        """
+        # 记录顶点是否在队列中，以及当前源点到该顶点的路径长和上次更新路径的顶点编号
+        records = [[0, None, None] for _ in xrange(self.nums_vertex)]
+        num_vertex = self.name_coder[vertex_name]
+        # 记录顶点进入队列的次数，有顶点进入队列的次数达到 N+1 时（N 表示图顶点数），说明存在负值圈
+        counter_map = defaultdict(int)
+        # 将源点放入队列，以及更新相关的信息
+        candidates = Queue(self.nums_vertex)
+        candidates.put(num_vertex)
+        counter_map[num_vertex] += 1
+        records[num_vertex][0] = 1
+        records[num_vertex][1] = 0
+        
+        while not candidates.empty():
+            vertex = candidates.get()
+            records[vertex][0] = 0
+            for node, weight in self._adjacencyList[vertex]:
+                if (records[node][1] == None) or (records[vertex][1] + weight < records[node][1]):
+                    records[node][1] = records[vertex][1] + weight
+                    records[node][2] = vertex
+                    if records[node][0] == 0:
+                        candidates.put(node)
+                        records[node][0] = 1
+                        counter_map[node] += 1
+                        # 说明已经出现了负值圈，终止循环
+                        if counter_map[node] > self.nums_vertex:
+                            break
+        self._printShortPath(records, num_vertex, _len_posi=1, _par_posi=2)
+        
+            
+    def poWeightedShortPath(self, vertex_name):
+        """
+        计算指定源顶点到图中所有其它顶点的加权最短路径（无负权值）（Dijkstra的优先队列实现）
         
         Patrameters
         -----------
@@ -188,7 +222,39 @@ class Graph(object):
                         records[node][2] = vertex
                         candidates.push(priority=records[node][1], content=node)
         self._printShortPath(records, num_vertex, _len_posi=1, _par_posi=2)
-            
+        
+    def minTreePrim(self, start_point):
+        """
+        生成无向图的最小生成树（Prime算法）
+        
+        Parameters
+        ----------
+        start_point: str
+            最开始加入到生成树中顶点名称
+        """
+        # 记录顶点的状态，包括是否已经是生成树中的节点，到树中的距离，以及最后更新该节点距离的节点号
+        records = [[0, None, None] for _ in xrange(self.nums_vertex)]
+        num_vertex = self.name_coder[start_point]
+        records[num_vertex][1] = 0
+        candidates = PriorityQueue()
+        candidates.push(priority=0, content=num_vertex)
+        
+        sum_weight = 0
+        
+        while not candidates.empty():
+            priority, vertex = candidates.pop()
+            sum_weight += priority
+            records[vertex][0] = 1
+            for node, weight in self._adjacencyList[vertex]:
+                # 对还没有添加到生成树中的节点进行测试
+                if records[node][0] == 0:
+                    if (records[node][1] == None) or (records[node][1] > weight):
+                        records[node][1] = weight
+                        records[node][2] = vertex
+                        candidates.push(weight, node)
+        self._printShortPath(records, num_vertex, _len_posi=1, _par_posi=2)
+        return sum_weight
+        
     def __str__(self):
         """
         打印图
@@ -239,7 +305,7 @@ class PriorityQueue(object):
     
     def pop(self):
         """
-        弹出优先级最小的堆顶元素，如果队列已经为空，则引发KeyError
+        弹出优先级最小的堆顶元素（priority, content），如果队列已经为空，则引发KeyError
         """
         while self._container:
             priority, cnt, content = heapq.heappop(self._container)
@@ -266,14 +332,22 @@ class PriorityQueue(object):
     
     
 def main():
+    edges = [('v1', 'v2', 2), ('v1', 'v4', 1), ('v2', 'v1', 2), ('v4', 'v1', 1),
+             ('v2', 'v4', 3), ('v2', 'v5', 10), ('v4', 'v2', 3), ('v5', 'v2', 10),
+             ('v3', 'v1', 4), ('v3', 'v6', 5), ('v1', 'v3', 4), ('v6', 'v3', 5),
+             ('v4', 'v3', 2), ('v4', 'v5', 7), ('v4', 'v6', 8), ('v4', 'v7', 4),
+             ('v3', 'v4', 2), ('v5', 'v4', 7), ('v6', 'v4', 8), ('v7', 'v4', 4),
+             ('v5', 'v7', 6), ('v7', 'v5', 6),
+             ('v7', 'v6', 1), ('v6', 'v7', 1)]
+    
     arcs = [('v1', 'v2', 2), ('v1', 'v4', 1),
             ('v2', 'v4', 3), ('v2', 'v5', 10),
             ('v3', 'v1', 4), ('v3', 'v6', 5),
             ('v4', 'v3', 2), ('v4', 'v5', 2), ('v4', 'v6', 8), ('v4', 'v7', 4),
             ('v5', 'v7', 6),
             ('v7', 'v6', 1)]
-    gra = Graph(arcs)
-    gra.weightedShortPath('v1')
+    gra = Graph(edges)
+    print(gra.minTreePrim('v1'))
     
 if __name__ == '__main__':
     main()

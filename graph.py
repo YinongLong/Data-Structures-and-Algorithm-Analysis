@@ -9,6 +9,8 @@ from __future__ import print_function
 from itertools import count
 from Queue import Queue
 
+import heapq
+
 class Graph(object):
     """
     定义图的数据结构（使用邻接表存储），并且实现对图的各种操作（拓扑排序）
@@ -116,47 +118,76 @@ class Graph(object):
                     records[node][0] = records[temp_vertex][0] + 1
                     records[node][1] = temp_vertex
                     candidates.put(node)
-        # 返回路径
-        def getPath(nodes, index):
-            path = ""
-            while nodes[index][1] != None:
-                if path != "":
-                    path = '->' + path
-                path = self.names[nodes[index][1]] + path
-                index = nodes[index][1]
-            return path
+        self._printShortPath(records, start_point=vertex_num)
+            
+    def _printShortPath(self, records, start_point, _len_posi=0, _par_posi=1):
+        """
+        打印求出的最短路径
         
-        # 以递归的形式打印路径
+        Parameters
+        ----------
+        records: list
+            记录图的每个顶点的状态
+            
+        start_point: int
+            单源点最短路径的起始顶点的标号
+            
+        _len_posi: int
+            指明路径长度存放的位置
+            
+        _par_posi: int
+            指明存放路径上一个顶点的标号的位置
+        """
+         # 以递归的形式打印路径
         def printPath(nodes, index):
-            if nodes[index][1] != None:
-                temp_path = printPath(nodes, nodes[index][1])
+            if nodes[index][_par_posi] != None:
+                temp_path = printPath(nodes, nodes[index][_par_posi])
                 temp_path += " -> "
                 temp_path += self.names[index]
                 return temp_path
             return self.names[index]
         
         for index in xrange(self.nums_vertex):
-#            path = getPath(records, index)
-#            path += "->" + self.names[index]
             path = printPath(records, index)
-            print("The dist between Original vertex and %s is: %d" % (self.names[index], records[index][0]))
+            print("The shortest path length between %s and %s is: %d" % (self.names[start_point],
+                                                                         self.names[index],
+                                                                         records[index][_len_posi]))
             print(path)
             
     def weightedShortPath(self, vertex_name):
         """
-        计算指定源顶点到图中所有其它顶点的有权最短路径（无负权值）
+        计算指定源顶点到图中所有其它顶点的有权最短路径（无负权值）（Dijkstra的优先队列实现）
         
         Patrameters
         -----------
         vertex_name: str
             指定计算的源顶点
         """
-        records = [[0, None] for _ in xrange(self.nums_vertex)]
-        num_vertex = self.names[vertex_name]
-        # 标记源顶点为已访问顶点
-        records[num_vertex][0] = 1
+        # 记录是否已经找到最短路径，以及源点当前到该顶点的距离和上次更新该顶点的顶点号
+        records = [[0, None, None] for _ in xrange(self.nums_vertex)]
+        num_vertex = self.name_coder[vertex_name]
         
-        
+        candidates = PriorityQueue()
+        candidates.push(priority=0, content=num_vertex)
+        records[num_vertex][1] = 0
+    
+        while not candidates.empty():
+            # 弹出待候选顶点中拥有最短距离的路径长和顶点号
+            priority, vertex = candidates.pop()
+            records[vertex][0] = 1
+            # 更新弹出顶点邻接的顶点
+            for node, weight in self._adjacencyList[vertex]:
+                # 只更新未找到最短路径的顶点
+                if records[node][0] == 0:
+                    if records[node][1] == None:
+                        records[node][1] = priority + weight
+                        records[node][2] = vertex
+                        candidates.push(priority=records[node][1], content=node)
+                    elif ((priority + weight) < records[node][1]):
+                        records[node][1] = priority + weight
+                        records[node][2] = vertex
+                        candidates.push(priority=records[node][1], content=node)
+        self._printShortPath(records, num_vertex, _len_posi=1, _par_posi=2)
             
     def __str__(self):
         """
@@ -172,3 +203,77 @@ class Graph(object):
                     print("  ", self.names[node], end="")
                 print()
         return ""
+    
+    
+class PriorityQueue(object):
+    """
+    对Python标准库优先队列的补充实现，来方便在优先队列中的查找、更新，以及
+    删除操作，而且在对象具有相同优先级时，按照压入的顺序返回。
+    """
+    
+    def __init__(self):
+        self._container = []
+        self._entry_mapper = {}
+        self._REMOVED = '<REMOVED>'
+        self._counter = count()
+        
+    def push(self, priority, content):
+        """
+        将对象压入min-heap堆
+        
+        Parameters
+        ----------
+        priority: int
+            在优先队列中进行排序的优先级
+            
+        content: object
+            被压入对象的内容，必须是可以hash的，否则引发TypeError
+        """
+        if content in self._entry_mapper:
+            self.remove(content)
+        cnt = self._counter.next()
+        entry = [priority, cnt, content]
+        heapq.heappush(self._container, entry)
+        # 将压入堆的项纪录在字典中
+        self._entry_mapper[content] = entry
+    
+    def pop(self):
+        """
+        弹出优先级最小的堆顶元素，如果队列已经为空，则引发KeyError
+        """
+        while self._container:
+            priority, cnt, content = heapq.heappop(self._container)
+            if content is not self._REMOVED:
+                del self._entry_mapper[content]
+                return (priority, content)
+        raise KeyError("Pop from an empty priority queue !")
+    
+    def remove(self, content):
+        """
+        删除优先队列中的指定元素（用标记的方式）
+        """
+        entry = self._entry_mapper.pop(content)
+        entry[-1] = self._REMOVED
+        
+    def empty(self):
+        """
+        返回队列是否为空，如果为空则返回True，否则为False
+        """
+        if len(self._entry_mapper) > 0:
+            return False
+        else:
+            return True
+    
+    
+def main():
+    arcs = [('v1', 'v2', 2), ('v1', 'v4', 1),
+            ('v2', 'v4', 3), ('v2', 'v5', 10),
+            ('v3', 'v1', 4), ('v3', 'v6', 5),
+            ('v4', 'v3', 2), ('v4', 'v5', 2), ('v4', 'v6', 8), ('v4', 'v7', 4),
+            ('v5', 'v7', 6),
+            ('v7', 'v6', 1)]
+    gra = Graph(arcs)
+    gra.weightedShortPath('v1')
+    
+if __name__ == '__main__':
+    main()

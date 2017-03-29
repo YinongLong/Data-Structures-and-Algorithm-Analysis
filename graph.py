@@ -7,16 +7,16 @@ Created on Wed Mar 22 08:25:14 2017
 from __future__ import print_function
 
 from itertools import count
-from Queue import Queue
 from collections import defaultdict
 
 import heapq
+
 
 class Graph(object):
     """
     定义图的数据结构（使用邻接表存储），并且实现对图的各种操作（拓扑排序、几种最短路径的实现）
     """
-    
+
     def __init__(self, edge_pairs):
         """
         初始化图，将图初始化为带权图，如果初始化时没有给出权值，则默认为1
@@ -56,35 +56,35 @@ class Graph(object):
             self._adjacencyList[num1].append((num2, weight))
         self.nums_vertex = len(self.names)
             
-    def topologySort(self):
+    def topology_sort(self):
         """
         实现图（只针对有向图）的拓扑排序（可以用来判断有向图是否存在圈）
         """
         # 首先计算每一个顶点的入度，这里会对每一条边进行遍历，因此时间复杂度为O(V+E)
-        indegree = [0] * self.nums_vertex
+        in_degree = [0] * self.nums_vertex
         for nodes in self._adjacencyList:
             for node, _ in nodes:
-                indegree[node] += 1
+                in_degree[node] += 1
         # 将入度为0的定点放入队列，这里使用队列存储入度为0的顶点，相比于每次扫描一遍
         # 记录入度的数组的时间复杂度O(V^2)提高到了O(V+E)
-        candidates = Queue(self.nums_vertex)
-        for index in xrange(self.nums_vertex):
-            if indegree[index] == 0:
-                candidates.put(index)
+        candidates = []
+        for index in range(self.nums_vertex):
+            if in_degree[index] == 0:
+                candidates.append(index)
             
-        topo_sort = []
-        while not candidates.empty():
-            index = candidates.get()
-            topo_sort.append(self.names[index])
+        result = list()
+        while candidates:
+            index = candidates.pop(0)
+            result.append(self.names[index])
             for node, _ in self._adjacencyList[index]:
-                indegree[node] -= 1
-                if indegree[node] == 0:
-                    candidates.put(node)
-        if len(topo_sort) != self.nums_vertex:
+                in_degree[node] -= 1
+                if in_degree[node] == 0:
+                    candidates.append(node)
+        if len(result) != self.nums_vertex:
             raise TypeError("This graph has a loop !!! ")
-        return topo_sort
+        return result
     
-    def unweightedShortPath(self, vertex_name):
+    def unweighted_short_path(self, vertex_name):
         """
         实现有向图的单原点无权最短路径，即从指定顶点出发到其他顶点最短
         需要经过的边数。实现的想法就是图的广度优先遍历（breadth-first search）
@@ -103,25 +103,25 @@ class Graph(object):
         的每一个列表都对应的同一个引用，所有每一次对其中一个元素的赋值都会影响到其它所
         有的项！！
         """
-        records = [[None, None] for _ in xrange(self.nums_vertex)] # 涉及对象的深浅拷贝问题
+        records = [[None, None] for _ in range(self.nums_vertex)]  # 涉及对象的深浅拷贝问题
         vertex_num = self.name_coder[vertex_name]
         # 源点到自身的无权最短路径为0
        
         records[vertex_num][0] = 0
         
-        candidates = Queue(self.nums_vertex)
-        candidates.put(vertex_num)
+        candidates = list()
+        candidates.append(vertex_num)
         
-        while not candidates.empty():
-            temp_vertex = candidates.get()
+        while candidates:
+            temp_vertex = candidates.pop(0)
             for node, _ in self._adjacencyList[temp_vertex]:
-                if records[node][0] == None:
+                if records[node][0] is None:
                     records[node][0] = records[temp_vertex][0] + 1
                     records[node][1] = temp_vertex
-                    candidates.put(node)
-        self._printShortPath(records, start_point=vertex_num)
-            
-    def _printShortPath(self, records, start_point, _len_posi=0, _par_posi=1):
+                    candidates.append(node)
+        self._print_short_path(records, start_point=vertex_num)
+
+    def _print_short_path(self, records, start_point, _len_position=0, _par_position=1):
         """
         打印求出的最短路径
         
@@ -133,72 +133,71 @@ class Graph(object):
         start_point: int
             单源点最短路径的起始顶点的标号
             
-        _len_posi: int
+        _len_position: int
             指明路径长度存放的位置
             
-        _par_posi: int
+        _par_position: int
             指明存放路径上一个顶点的标号的位置
         """
-         # 以递归的形式打印路径
-        def printPath(nodes, index):
-            if nodes[index][_par_posi] != None:
-                temp_path = printPath(nodes, nodes[index][_par_posi])
+        # 以递归的形式打印路径
+        def print_path(nodes, no_index):
+            if nodes[no_index][_par_position] is not None:
+                temp_path = print_path(nodes, nodes[no_index][_par_position])
                 temp_path += " -> "
-                temp_path += self.names[index]
+                temp_path += self.names[no_index]
                 return temp_path
-            return self.names[index]
+            return self.names[no_index]
         
-        for index in xrange(self.nums_vertex):
-            path = printPath(records, index)
+        for index in range(self.nums_vertex):
+            path = print_path(records, index)
             print("The shortest path length between %s and %s is: %d" % (self.names[start_point],
                                                                          self.names[index],
-                                                                         records[index][_len_posi]))
+                                                                         records[index][_len_position]))
             print(path)
             
-    def neWeightedShortPath(self, vertex_name):
+    def negative_weighted_short_path(self, vertex_name):
         """
         计算制定源点到图中所有其它定点的加权最短路径（有负值权，但无负值圈）
         """
         # 记录顶点是否在队列中，以及当前源点到该顶点的路径长和上次更新路径的顶点编号
-        records = [[0, None, None] for _ in xrange(self.nums_vertex)]
+        records = [[0, None, None] for _ in range(self.nums_vertex)]
         num_vertex = self.name_coder[vertex_name]
         # 记录顶点进入队列的次数，有顶点进入队列的次数达到 N+1 时（N 表示图顶点数），说明存在负值圈
         counter_map = defaultdict(int)
         # 将源点放入队列，以及更新相关的信息
-        candidates = Queue(self.nums_vertex)
-        candidates.put(num_vertex)
+        candidates = list()
+        candidates.append(num_vertex)
         counter_map[num_vertex] += 1
         records[num_vertex][0] = 1
         records[num_vertex][1] = 0
         
-        while not candidates.empty():
-            vertex = candidates.get()
+        while candidates:
+            vertex = candidates.pop(0)
             records[vertex][0] = 0
             for node, weight in self._adjacencyList[vertex]:
-                if (records[node][1] == None) or (records[vertex][1] + weight < records[node][1]):
+                if (records[node][1] is None) or (records[vertex][1] + weight < records[node][1]):
                     records[node][1] = records[vertex][1] + weight
                     records[node][2] = vertex
                     if records[node][0] == 0:
-                        candidates.put(node)
+                        candidates.append(node)
                         records[node][0] = 1
                         counter_map[node] += 1
                         # 说明已经出现了负值圈，终止循环
                         if counter_map[node] > self.nums_vertex:
                             break
-        self._printShortPath(records, num_vertex, _len_posi=1, _par_posi=2)
-        
-            
-    def poWeightedShortPath(self, vertex_name):
+        self._print_short_path(records, num_vertex, _len_position=1, _par_position=2)
+
+    def positive_weighted_short_path(self, vertex_name):
         """
         计算指定源顶点到图中所有其它顶点的加权最短路径（无负权值）（Dijkstra的优先队列实现）
         
-        Patrameters
-        -----------
+        Parameters
+        ----------
         vertex_name: str
             指定计算的源顶点
         """
         # 记录是否已经找到最短路径，以及源点当前到该顶点的距离和上次更新该顶点的顶点号
-        records = [[0, None, None] for _ in xrange(self.nums_vertex)]
+        records = [[0, None, None] for _ in range(self.nums_vertex)]
         num_vertex = self.name_coder[vertex_name]
         
         candidates = PriorityQueue()
@@ -213,17 +212,17 @@ class Graph(object):
             for node, weight in self._adjacencyList[vertex]:
                 # 只更新未找到最短路径的顶点
                 if records[node][0] == 0:
-                    if records[node][1] == None:
+                    if records[node][1] is None:
                         records[node][1] = priority + weight
                         records[node][2] = vertex
                         candidates.push(priority=records[node][1], content=node)
-                    elif ((priority + weight) < records[node][1]):
+                    elif (priority + weight) < records[node][1]:
                         records[node][1] = priority + weight
                         records[node][2] = vertex
                         candidates.push(priority=records[node][1], content=node)
-        self._printShortPath(records, num_vertex, _len_posi=1, _par_posi=2)
+        self._print_short_path(records, num_vertex, _len_position=1, _par_position=2)
         
-    def minTreePrim(self, start_point):
+    def min_span_tree_prim(self, start_point):
         """
         生成无向图的最小生成树（Prime算法）
         
@@ -232,13 +231,14 @@ class Graph(object):
         start_point: str
             最开始加入到生成树中顶点名称
         """
-        # 记录顶点的状态，包括是否已经是生成树中的节点，到树中的距离，以及最后更新该节点距离的节点号
-        records = [[0, None, None] for _ in xrange(self.nums_vertex)]
+        # 记录顶点的状态，包括是否已经是生成树中的节点，到树中顶点集的距离，以及最后更新该节点距离的节点号
+        records = [[0, None, None] for _ in range(self.nums_vertex)]
         num_vertex = self.name_coder[start_point]
         records[num_vertex][1] = 0
         candidates = PriorityQueue()
         candidates.push(priority=0, content=num_vertex)
-        
+
+        # 代表最小生成树的总权重
         sum_weight = 0
         
         while not candidates.empty():
@@ -248,11 +248,11 @@ class Graph(object):
             for node, weight in self._adjacencyList[vertex]:
                 # 对还没有添加到生成树中的节点进行测试
                 if records[node][0] == 0:
-                    if (records[node][1] == None) or (records[node][1] > weight):
+                    if (records[node][1] is None) or (records[node][1] > weight):
                         records[node][1] = weight
                         records[node][2] = vertex
                         candidates.push(weight, node)
-        self._printShortPath(records, num_vertex, _len_posi=1, _par_posi=2)
+        self._print_short_path(records, num_vertex, _len_position=1, _par_position=2)
         return sum_weight
         
     def __str__(self):
@@ -260,7 +260,7 @@ class Graph(object):
         打印图
         """
         print(" " * 3, "Vertex", " " * 6, "Adjacency Nodes")
-        for index in xrange(self.nums_vertex):
+        for index in range(self.nums_vertex):
             if len(self._adjacencyList[index]) == 0:
                 print(" " * 3, self.names[index])
             else:
@@ -273,8 +273,10 @@ class Graph(object):
     
 class PriorityQueue(object):
     """
-    对Python标准库优先队列的补充实现，来方便在优先队列中的查找、更新，以及
-    删除操作，而且在对象具有相同优先级时，按照压入的顺序返回。
+    对Python标准库heapq优先队列的补充实现，来方便在优先队列中的查找、更新，以及
+    删除操作，而且在对象具有相同优先级时，按照压入的顺序返回。这里利用了Python的
+    引用机制，即使用一个字典保存压入堆的对象的引用，来方便后续实现对对象的删除以及
+    更新操作。
     """
     
     def __init__(self):
@@ -311,7 +313,7 @@ class PriorityQueue(object):
             priority, cnt, content = heapq.heappop(self._container)
             if content is not self._REMOVED:
                 del self._entry_mapper[content]
-                return (priority, content)
+                return priority, content
         raise KeyError("Pop from an empty priority queue !")
     
     def remove(self, content):
@@ -347,7 +349,8 @@ def main():
             ('v5', 'v7', 6),
             ('v7', 'v6', 1)]
     gra = Graph(edges)
-    print(gra.minTreePrim('v1'))
-    
+    print(gra.min_span_tree_prim('v1'))
+
+
 if __name__ == '__main__':
     main()

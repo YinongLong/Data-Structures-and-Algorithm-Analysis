@@ -8,6 +8,7 @@ from __future__ import print_function
 
 import random
 
+
 class Sort(object):
     
     def __init__(self):
@@ -53,6 +54,7 @@ class Sort(object):
                     self.array[small], self.array[index] = self.array[index], self.array[small]
         small += 1
         self.array[small], self.array[end] = self.array[end], self.array[small]
+
         return small
     
 def main():

@@ -224,7 +224,7 @@ class Graph(object):
         
     def min_span_tree_prim(self, start_point):
         """
-        生成无向图的最小生成树（Prime算法）
+        生成无向图的最小生成树（Prim算法）
         
         Parameters
         ----------
@@ -254,7 +254,47 @@ class Graph(object):
                         candidates.push(weight, node)
         self._print_short_path(records, num_vertex, _len_position=1, _par_position=2)
         return sum_weight
+
+    def min_span_tree_kruskal(self):
+        """
+        生成无向图的最小生成树（Kruskal算法）
         
+        :returns: 返回最小生成树的权重和连接关系
+        """
+        # 存储无向图的边
+        candidates = PriorityQueue()
+
+        # 将无向图的边读取到优先队列中
+        for index in range(self.nums_vertex):
+            for node, weight in self._adjacencyList[index]:
+                candidates.push(weight, (index, node))
+        # 将每个顶点划分到不同的集合中，划分元组标记
+        separate_set = dict()
+        for vertex in range(self.nums_vertex):
+            separate_set[vertex] = [vertex]
+        # 记录已经添加到生成树中的边的个数和总权重
+        edges_accepted = 0
+        sum_weight = 0
+        result = []
+        while edges_accepted < (self.nums_vertex - 1):
+            weight, edge = candidates.pop()
+            v1, v2 = edge
+            v1_set = separate_set[v1]
+            v2_set = separate_set[v2]
+            if v1_set is not v2_set:
+                edges_accepted += 1
+                result.append((self.names[v1], self.names[v2]))
+                # 进行集合的合并
+                temp_value = list()
+                for item in v1_set:
+                    separate_set[item] = temp_value
+                    temp_value.append(item)
+                for item in v2_set:
+                    separate_set[item] = temp_value
+                    temp_value.append(item)
+                sum_weight += weight
+        return sum_weight, result
+
     def __str__(self):
         """
         打印图
@@ -349,7 +389,7 @@ def main():
             ('v5', 'v7', 6),
             ('v7', 'v6', 1)]
     gra = Graph(edges)
-    print(gra.min_span_tree_prim('v1'))
+    print(gra.min_span_tree_kruskal())
 
 
 if __name__ == '__main__':

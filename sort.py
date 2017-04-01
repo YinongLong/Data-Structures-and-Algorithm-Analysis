@@ -9,6 +9,151 @@ Created on Tue Mar 28 08:56:42 2017
 from __future__ import print_function
 
 import random
+import time
+
+
+def merge_sort(array):
+    """
+    对可比较的对象列表进行归并排序
+    
+    :param array: list
+        存储待排序对象的列表
+        
+    :return: None
+        无返回值，在原址进行排序
+    """
+    len_array = len(array)
+    temp_array = list(array)
+    _ms_sort(array, temp_array, 0, len_array - 1)
+
+
+def _ms_sort(array, temp_array, start, end):
+    """
+    归并排序的递归部分
+    
+    :param array: list
+        待排序的对象列表
+         
+    :param temp_array: list
+        进行有序子列表的合并列表
+        
+    :param start: int
+        递归排序列表的起始索引
+        
+    :param end: int
+        递归排序列表的终止索引
+        
+    :return: None
+        原址排序，不返回值
+    """
+    if start < end:
+        center = (start + end) / 2
+        _ms_sort(array, temp_array, start, center)
+        _ms_sort(array, temp_array, center + 1, end)
+        _merge_sub_array(array, temp_array, start, center + 1, end)
+
+
+def _merge_sub_array(array, temp_array, left_start, right_start, right_end):
+    """
+    对两个有序的子列表进行合并
+    
+    :param array: list
+        原始待排序列表
+        
+    :param temp_array: list
+        进行合并存储的临时列表
+        
+    :param left_start: int
+        待合并子列表的前一个的起始索引
+        
+    :param right_start: int
+        待合并子列表的后一个的起始索引
+        
+    :param right_end: int
+        待合并子列表的后一个的终止索引
+        
+    :return: None
+        不返回值
+    """
+    left_end = right_start - 1
+    temp_index = left_start
+    left_start_copy = left_start
+    while (left_start <= left_end) and (right_start <= right_end):
+        if array[left_start] <= array[right_start]:
+            temp_array[temp_index] = array[left_start]
+            left_start += 1
+        else:
+            temp_array[temp_index] = array[right_start]
+            right_start += 1
+        temp_index += 1
+    while left_start <= left_end:
+        temp_array[temp_index] = array[left_start]
+        left_start += 1
+        temp_index += 1
+    while right_start <= right_end:
+        temp_array[temp_index] = array[right_start]
+        right_start += 1
+        temp_index += 1
+    # 将临时列表中的合并结果复制回原排序列表
+    while right_end >= left_start_copy:
+        array[right_end] = temp_array[right_end]
+        right_end -= 1
+
+
+def _maintain_heap(array, index, len_array):
+    """
+    在堆排序中维持最大堆结构
+    
+    :param array: list
+        存储对象的堆（使用列表表示）
+        
+    :param index: int
+        需要维护的子堆索引
+        
+    :param len_array: int
+        存储堆结构的列表的大小
+        
+    :return: None
+        不返回值，只是在原址对堆进行维护
+    """
+    def get_left_child(i):
+        return i * 2 + 1
+
+    child = get_left_child(index)
+    temp_value = array[index]
+    while child < len_array:
+        # 判断是否存在右孩子，以及右孩子是否大于左孩子存储的值
+        if (child < (len_array - 1)) and (array[child + 1] > array[child]):
+            child += 1
+        if temp_value < array[child]:
+            array[index] = array[child]
+            index = child
+            child = get_left_child(index)
+        else:
+            array[index] = temp_value
+            break
+
+
+def heap_sort(array):
+    """
+    实现堆排序
+    
+    :param array: list
+        待排序的对象列表
+        
+    :return: None
+        对待排序的列表进行原址排序，不返回任何值
+    """
+    len_array = len(array)
+    # 首先对整个列表构造一个最大堆
+    index = len_array / 2
+    while index >= 0:
+        _maintain_heap(array, index, len_array)
+        index -= 1
+    # 开始从堆顶删除元素（即与堆尾元素交换，最后使得列表按照递增排序）
+    for i in range(1, len_array):
+        array[0], array[-i] = array[-i], array[0]
+        _maintain_heap(array, 0, len_array - i)
 
 
 def shell_sort(array, steps=None):
@@ -122,17 +267,41 @@ def _partition(array, start, end):
     array[small], array[end] = array[end], array[small]
     return small
 
+
+def run_cost_time(algorithm, array):
+    """
+    记录排序算法运行的时间
+    :param algorithm: object
+        用来进行排序的算法
+        
+    :param array: list
+        待排序的列表
+        
+    :return: None
+        打印输出运行排序算法所需要的时间
+    """
+    start_time = time.time()
+    algorithm(array)
+    end_time = time.time()
+    cost_time = end_time - start_time
+    print('Running algorithm %s spends: %.2f' % (str(algorithm), cost_time))
+
     
 def main():
-    size = 20
+    """
+    对于随机产生的数列，测试所有的排序算法
+    
+    :return: None
+    """
+    size = 3000
     array = [random.randint(0, 100) for _ in range(size)]
-    sort_algorithms = [insert_sort, shell_sort, quick_sort]
+    sort_algorithms = [insert_sort, shell_sort, quick_sort, heap_sort, merge_sort]
     result = []
     for algorithm in sort_algorithms:
         copy_array = list(array)
-        print(copy_array)
-        algorithm(copy_array)
-        print(copy_array, '\n')
+        # print(copy_array)
+        run_cost_time(algorithm, copy_array)
+        # print(copy_array, '\n')
         result.append(copy_array)
     for i in range(1, len(result)):
         if result[i] != result[i]:

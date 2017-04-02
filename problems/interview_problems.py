@@ -25,6 +25,7 @@ def big_integer_add(num1, num2):
     def raise_val_error():
         raise ValueError('The argument value is not correct!')
 
+    # 进行参数的检查，并且返回参数的正负性，如果是正数，则返回True
     def check_parameter(parameter):
         para_positive = False if parameter.startswith('-') else True
         if para_positive and not parameter.isdigit():
@@ -37,38 +38,74 @@ def big_integer_add(num1, num2):
     num2_positive = check_parameter(num2)
     # 设置两个大整数数位之间运算的操作符
     op = operator.sub if (num1_positive ^ num2_positive) else operator.add
+    # 获取两个数位的长度
     num1_len = len(num1)
     if not num1_positive:
         num1_len -= 1
     num2_len = len(num2)
     if not num2_positive:
         num2_len -= 1
+
+    # 开始进行计算
     index = -1
     temp_result = []
-    need_update = False
     while (abs(index) <= num1_len) and (abs(index) <= num2_len):
         value = op(int(num1[index]), int(num2[index]))
-        if need_update and (op is operator.sub):
-            value -= 1
-            need_update = False
-        elif need_update and (op is operator.add):
-            value += 1
-            need_update = False
-
-        if (op is operator.sub) and value < 0:
-            value += 10
-            need_update = True
-        elif (op is operator.add) and value > 9:
-            value %= 10
-            need_update = True
         temp_result.insert(0, value)
         index -= 1
     while abs(index) <= num1_len:
         value = int(num1[index])
-        if need_update and (op is operator.sub):
-            value -= 1
-            need_update = False
-        # elif need_update and (op is )
+        temp_result.insert(0, value)
+        index -= 1
+    while abs(index) <= num2_len:
+        value = op(0, int(num2[index]))
+        temp_result.insert(0, value)
+        index -= 1
+    # 计算结束，开始进行进位或借位操作
+    need_update = False
+    if op is operator.add:  # 进位操作
+        for i in range(-1, -len(temp_result)-1, -1):
+            value = temp_result[i]
+            if need_update:
+                value += 1
+                need_update = False
+            if value >= 10:
+                value %= 10
+                need_update = True
+            temp_result[i] = value
+        if need_update:
+            temp_result.insert(0, 1)
+        result = ''
+        if not num1_positive and not num2_positive:
+            result += '-'
+        for item in temp_result:
+            result += str(item)
+    else:  # 借位操作
+        # 标记最终结果的正负号
+        num_sign = -1 if temp_result[0] < 0 else 1
+        for i in range(-1, -len(temp_result)-1, -1):
+            value = temp_result[i]
+            if need_update:
+                value += (-1 * num_sign)
+                need_update = False
+            if (num_sign * value) < 0:
+                value += (10 * num_sign)
+                need_update = True
+            temp_result[i] = abs(value)
+        while len(temp_result) > 0 and (temp_result[0] == 0):
+            temp_result.pop(0)
+        result = ''
+        if num1_positive and len(temp_result) > 0:
+            if num_sign == -1:
+                result += '-'
+        if num2_positive and len(temp_result) > 0:
+            if num_sign == 1:
+                result += '-'
+        for item in temp_result:
+            result += str(item)
+        if len(result) == 0:
+            result += '0'
+    return result
 
 
 def big_integer_add_1(var):
@@ -109,7 +146,7 @@ def big_integer_add_1(var):
                 need_update = True
             if not need_update:
                 if (abs(index) == length_str) and (result == 0):
-                    if length_str == 1: # 处理 -1 的特殊情况
+                    if length_str == 1:  # 处理 -1 的特殊情况
                         return '0'
                     return var[:index] + str_semi
                 else:
@@ -136,7 +173,7 @@ def big_integer_add_1(var):
 
 
 def main():
-    print(big_integer_add_1('-10'))
+    print(big_integer_add('-2', '1'))
     pass
 
 

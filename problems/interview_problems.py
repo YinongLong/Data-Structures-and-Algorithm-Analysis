@@ -9,6 +9,83 @@ from __future__ import print_function
 import operator
 
 
+def find_longest_sequence(str1, str2):
+    """
+    查找两个字符串的最长公共子序列（注意与最长公共子串的区别）
+    
+    :param str1: str
+        其中的一个字符串参数
+        
+    :param str2: str
+        其中的另外一个字符串参数
+        
+    :return: str
+        返回的最长子序列结果
+    """
+    len_str1 = len(str1)
+    len_str2 = len(str2)
+    # 初始化存储中间状态的矩阵
+    matrix = [[0 for _ in range(len_str1 + 1)] for _ in range(len_str2 + 1)]
+    for i in range(len_str2):
+        char_str2 = str2[i]
+        for j in range(len_str1):
+            char_str1 = str1[j]
+            if char_str1 == char_str2:
+                matrix[i+1][j+1] = matrix[i][j] + 1
+            else:
+                matrix[i+1][j+1] = max(matrix[i+1][j], matrix[i][j+1])
+    row = len_str2
+    col = len_str1
+    result = ''
+    while (row > 0) and (col > 0):
+        temp_num = matrix[row][col]
+        while (col > 1) and (matrix[row][col-1] == temp_num):
+            col -= 1
+        while (row > 1) and (matrix[row-1][col] == temp_num):
+            row -= 1
+        result = str1[col-1] + result
+        row -= 1
+        col -= 1
+    return result
+
+
+def find_longest_substring(str1, str2):
+    """
+    查找两个字符串的最长公共子串（注意与最长子序列的差别）
+    
+    :param str1: str
+        其中一个字符串参数
+        
+    :param str2: str
+        其中另外一个字符串参数
+        
+    :return: str
+        两个字符串的最长公共子串
+    """
+    len_str1 = len(str1)
+    len_str2 = len(str2)
+    # 初始化存储中间状态的矩阵
+    matrix = [[0 for _ in range(len_str1 + 1)] for _ in range(len_str2 + 1)]
+    len_max = -1
+    position = [-1, -1]
+    for i in range(len_str2):
+        char_str2 = str2[i]
+        for j in range(len_str1):
+            char_str1 = str1[j]
+            if char_str1 == char_str2:
+                matrix[i+1][j+1] = matrix[i][j] + 1
+                if matrix[i+1][j+1] > len_max:
+                    len_max = matrix[i+1][j+1]
+                    position = [i, j]
+    i, j = position
+    longest_substring = ''
+    while (i >= 0) and (j >= 0):
+        longest_substring = str2[i] + longest_substring
+        i -= 1
+        j -= 1
+    return longest_substring
+
+
 def big_integer_add(num1, num2):
     """
     实现大整数的加法，在这里需要注意正负符号的问题。
@@ -173,7 +250,7 @@ def big_integer_add_1(var):
 
 
 def main():
-    print(big_integer_add('-2', '1'))
+    print(find_longest_sequence('queue', 'sequence'))
     pass
 
 

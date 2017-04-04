@@ -2,13 +2,13 @@
 
 # 基本的数据结构的算法
 
-- 图论相关
-- 排序算法
+- 图论相关 (graph.py)
+- 排序算法 (sort.py)
 
 # 面试遇到的问题
 
-- 大整数加 1 问题
-- 两个大整数相加问题
-- 两个字符串的最长公共子串
-- 两个字符串的最长公共子序列
-- top-K问题
+- 大整数加 1 问题 (problems/interview_problems.py)
+- 两个大整数相加问题 (problems/interview_problems.py)
+- 两个字符串的最长公共子串 (problems/interview_problems.py)
+- 两个字符串的最长公共子序列 (problems/interview_problems.py)
+- top-K问题 (problems/interview_problems.py)

@@ -116,6 +116,7 @@ def _maintain_heap(array, index, len_array):
     :return: None
         不返回值，只是在原址对堆进行维护
     """
+
     def get_left_child(i):
         return i * 2 + 1
 
@@ -130,8 +131,8 @@ def _maintain_heap(array, index, len_array):
             index = child
             child = get_left_child(index)
         else:
-            array[index] = temp_value
             break
+    array[index] = temp_value
 
 
 def heap_sort(array):
@@ -213,7 +214,7 @@ def insert_sort(array):
 
 
 def quick_sort(array):
-    _quick_sort(array, 0, len(array)-1)
+    _quick_sort(array, 0, len(array) - 1)
 
 
 def _quick_sort(array, start, end):
@@ -286,7 +287,7 @@ def run_cost_time(algorithm, array):
     cost_time = end_time - start_time
     print('Running algorithm %s spends: %.2f' % (str(algorithm), cost_time))
 
-    
+
 def main():
     """
     对于随机产生的数列，测试所有的排序算法
@@ -305,9 +306,9 @@ def main():
         result.append(copy_array)
     for i in range(1, len(result)):
         if result[i] != result[i]:
-            print('Sort Algorithms %s and %s have problems!' % (str(sort_algorithms[i-1]), str(sort_algorithms[i])))
+            print('Sort Algorithms %s and %s have problems!' % (str(sort_algorithms[i - 1]), str(sort_algorithms[i])))
     print('Sort Algorithms are all right!')
 
-    
+
 if __name__ == '__main__':
     main()

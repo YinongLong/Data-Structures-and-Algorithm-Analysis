@@ -9,6 +9,53 @@ from __future__ import print_function
 import operator
 
 
+def top_k_number(array, k=5):
+    """
+    实现查找列表的前K大数字，思路：构造max-heap即可
+    
+    :param array: list
+        存储数字的列表
+        
+    :param k: int
+        指定需要查找的最大的数字个数
+        
+    :return: list
+        找出的K大数字
+    """
+    # 获取堆节点的左孩子
+    def get_left_child(i):
+        return 2 * i + 1
+
+    # 维持堆结构
+    def maintain_heap(arr, j, length):
+        child = get_left_child(j)
+        temp_value = arr[j]
+        while child < length:
+            if (child < (length - 1)) and (arr[child] < arr[child + 1]):
+                child += 1
+            if arr[child] > temp_value:
+                arr[j] = arr[child]
+                j = child
+                child = get_left_child(j)
+            else:
+                break
+        arr[j] = temp_value
+
+    len_array = len(array)
+    mid = len_array / 2
+    for index in range(mid, -1, -1):
+        maintain_heap(array, index, len_array)
+    result = []
+    end = len_array - 1
+    while k > 0:
+        result.append(array[0])
+        array[0], array[end] = array[end], array[0]
+        maintain_heap(array, 0, end)
+        end -= 1
+        k -= 1
+    return result
+
+
 def find_longest_sequence(str1, str2):
     """
     查找两个字符串的最长公共子序列（注意与最长公共子串的区别）
@@ -251,6 +298,7 @@ def big_integer_add_1(var):
 
 def main():
     print(find_longest_sequence('queue', 'sequence'))
+    print(top_k_number([1, 4, 2, 6, 8], 3))
     pass
 
 

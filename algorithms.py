@@ -35,7 +35,7 @@ def huffman_code(text):
     # 构建Huffman编码树，利用优先队列来进行存储树的根结点
     candidates = PriorityQueue()
     for key, val in counter.items():
-        candidates.push(key, [val])
+        candidates.push(val, [key])
 
     root = None
     while not candidates.empty():
@@ -49,8 +49,21 @@ def huffman_code(text):
             candidates.push(temp_priority, temp_children)
 
     sum_times = root[0]
+    print('The number of all characters is: %d' % sum_times)
 
-    pass
+    # 利用先序遍历生成字符的Huffman编码
+    def generate_huffman_code(tree, code_str, add_code, container):
+        if len(tree) == 1:
+            final_code = code_str + add_code
+            container[tree[0]] = final_code
+        else:
+            temp_code = code_str + add_code
+            generate_huffman_code(tree[0], temp_code, '0', container)
+            generate_huffman_code(tree[1], temp_code, '1', container)
+
+    result = dict()
+    generate_huffman_code(root[1], '', '', result)
+    return result
 
 
 class PriorityQueue(object):
@@ -137,18 +150,8 @@ class PriorityQueue(object):
 
 
 def main():
-    queue = PriorityQueue()
-    queue.push(1, 'a')
-    queue.push(2, 'b')
-    queue.push(7, 'c')
-    queue.push(3, 'd')
-    queue.push(6, 'e')
-    queue.push(4, 'f')
-    print(queue)
-    print(queue.empty())
-    while not queue.empty():
-        print(queue.pop())
-    pass
+    result = huffman_code('ababcabcdabcde')
+    print(result)
 
 if __name__ == '__main__':
     main()

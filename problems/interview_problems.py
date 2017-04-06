@@ -7,6 +7,178 @@
 from __future__ import print_function
 
 import operator
+import itertools
+
+
+class CandiesHeap(object):
+
+    def __init__(self):
+        """
+        初始化堆对象
+        """
+        # 存放糖果对象的列表
+        self.container = []
+        # 存放糖果的个数
+        self.length = 0
+        # 记录放入堆中的顺序
+        self.counter = itertools.count()
+
+    def _maintain_heap(self, index, length):
+        """
+        从index位置开始维持堆结构
+        
+        :param index: int
+            开始维持堆结构的位置
+            
+        :param length: int
+            堆的大小
+            
+        :return: None
+            不返回任何值
+        """
+        def get_left_child(i):
+            return 2 * i + 1
+
+        child = get_left_child(index)
+        temp_value = self.container[index]
+        while child < length:
+            if (child < (length - 1)) and (self.container[child + 1] > self.container[child]):
+                child += 1
+            if self.container[child] > temp_value:
+                self.container[index] = self.container[child]
+                index = child
+                child = get_left_child(index)
+            else:
+                break
+        self.container[index] = temp_value
+
+    def push(self, num_ingredient, number):
+        item = (num_ingredient, self.counter.next(), number)
+        self.container.append(item)
+        self.length += 1
+        self._maintain_heap(0, self.length)
+
+    def pop(self):
+        if self.length == 0:
+            return False
+        else:
+            item = self.container.pop(0)
+            self.length -= 1
+            return item[0], item[2]
+
+    def empty(self):
+        return False if self.length > 0 else True
+
+
+def _deal_with_candies(numbers, volume):
+    # 将两类糖果按照类别分别放在两个堆中，且在各自的堆中按照魔幻因子的从大到小弹出
+    candies_1_heap = CandiesHeap()
+    candies_2_heap = CandiesHeap()
+    for i in range(numbers):
+        category, ingredient = raw_input().strip().split()
+        category, ingredient = int(category), int(ingredient)
+        if category == 1:
+            candies_1_heap.push(ingredient, i + 1)
+        else:
+            candies_2_heap.push(ingredient, i + 1)
+    candy_2_num = None
+    candy_2_order = None
+    candy_11_num = None
+    candy_12_num = None
+    candy_11_order = None
+    candy_12_order = None
+    sum_ingredient = 0
+    container_1 = []
+    container_2 = []
+    while volume > 0:
+        if not candies_2_heap.empty() and (candy_2_num is None):
+            candy_2_num, candy_2_order = candies_2_heap.pop()
+        if not candies_1_heap.empty() and (candy_11_num is None):
+            candy_11_num, candy_11_order = candies_1_heap.pop()
+            second_result = candies_1_heap.pop()
+            if second_result is not False:
+                candy_12_num, candy_12_order = second_result
+            else:
+                candy_12_num, candy_12_order = 0, None
+        if (candy_11_num + candy_12_num) > candy_2_num:
+            sum_ingredient += candy_11_num + candy_12_num
+            container_1.append((candy_11_num, candy_11_order))
+            if candy_12_order is not None:
+                container_1.append((candy_12_num, candy_12_order))
+            candy_11_num = None
+            candy_12_num = None
+            if candy_12_order is None:
+                volume -= 1
+            else:
+                volume -= 2
+        else:
+            sum_ingredient += candy_2_num
+            container_2.append((candy_2_num, candy_2_order))
+            candy_2_num = None
+            volume -= 2
+        if volume == 1:
+            break
+    if volume == 1:
+        if not candies_2_heap.empty() and (candy_2_num is None):
+            candy_2_num, candy_2_order = candies_2_heap.pop()
+        if candy_2_num is None:
+            if not candies_1_heap.empty() and (candy_11_num is None):
+                candy_11_num, candy_11_order = candies_1_heap.pop()
+            if candy_11_num is not None:
+                sum_ingredient += candy_11_num
+                container_1.append((candy_11_num, candy_11_order))
+        else:
+            if not candies_1_heap.empty() and (candy_11_num is None):
+                candy_11_num, candy_11_order = candies_1_heap.pop()
+            if candy_11_num is None:
+                if len(container_1) != 0 and container_1[-1][0] < candy_2_num:
+                    sum_ingredient -= container_1[-1][0]
+                    sum_ingredient += candy_2_num
+                    container_1.pop(-1)
+                    container_2.append((candy_2_num, candy_2_order))
+            else:
+                if len(container_1) == 0:
+                    sum_ingredient += candy_11_num
+                    container_1.append((candy_11_num, candy_11_order))
+                else:
+                    if (candy_11_num + container_1[-1][0]) < candy_2_num:
+                        sum_ingredient -= container_1[-1][0]
+                        sum_ingredient += candy_2_num
+                        container_1.pop(-1)
+                        container_2.append((candy_2_num, candy_2_order))
+    order_heap = CandiesHeap()
+    for _, item_number in container_1:
+        order_heap.push(item_number, -1)
+    for _, item_number in container_2:
+        order_heap.push(item_number, -1)
+    result = []
+    while not order_heap.empty():
+        number, _ = order_heap.pop()
+        result.insert(0, number)
+    print_result = ''
+    for i in range(len(result)):
+        if i < (len(result) - 1):
+            print_result += str(result[i]) + ' '
+        else:
+            print_result += str(result[i])
+    if sum_ingredient == 0:
+        print_result = 'No'
+    print(sum_ingredient)
+    print(print_result)
+
+
+def buy_candies():
+    """
+    实现一个关于京东2016实习生笔试的买糖果的问题
+    
+    构建一个用来模拟车厢大小的小顶堆，先将所有的魔幻因子比较大的体积
+    为1的糖果放入堆中，尽量填满，如果不够，使用魔幻因子比较大的体积为
+    2的糖果来补充
+    """
+    while True:
+        numbers, volume = raw_input().strip().split()
+        numbers, volume = int(numbers), int(volume)
+        _deal_with_candies(numbers, volume)
 
 
 def top_k_number(array, k=5):
@@ -297,8 +469,9 @@ def big_integer_add_1(var):
 
 
 def main():
-    print(find_longest_sequence('queue', 'sequence'))
-    print(top_k_number([1, 4, 2, 6, 8], 3))
+    buy_candies()
+    # print(find_longest_sequence('queue', 'sequence'))
+    # print(top_k_number([1, 4, 2, 6, 8], 3))
     pass
 
 

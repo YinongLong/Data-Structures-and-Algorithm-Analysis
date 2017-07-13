@@ -26,13 +26,13 @@ class CandiesHeap(object):
     def _maintain_heap(self, index, length):
         """
         从index位置开始维持堆结构
-        
+
         :param index: int
             开始维持堆结构的位置
-            
+
         :param length: int
             堆的大小
-            
+
         :return: None
             不返回任何值
         """
@@ -170,7 +170,7 @@ def _deal_with_candies(numbers, volume):
 def buy_candies():
     """
     实现一个关于京东2016实习生笔试的买糖果的问题
-    
+
     构建一个用来模拟车厢大小的小顶堆，先将所有的魔幻因子比较大的体积
     为1的糖果放入堆中，尽量填满，如果不够，使用魔幻因子比较大的体积为
     2的糖果来补充
@@ -184,13 +184,13 @@ def buy_candies():
 def top_k_number(array, k=5):
     """
     实现查找列表的前K大数字，思路：构造max-heap即可
-    
+
     :param array: list
         存储数字的列表
-        
+
     :param k: int
         指定需要查找的最大的数字个数
-        
+
     :return: list
         找出的K大数字
     """
@@ -231,13 +231,13 @@ def top_k_number(array, k=5):
 def find_longest_sequence(str1, str2):
     """
     查找两个字符串的最长公共子序列（注意与最长公共子串的区别）
-    
+
     :param str1: str
         其中的一个字符串参数
-        
+
     :param str2: str
         其中的另外一个字符串参数
-        
+
     :return: str
         返回的最长子序列结果
     """
@@ -271,13 +271,13 @@ def find_longest_sequence(str1, str2):
 def find_longest_substring(str1, str2):
     """
     查找两个字符串的最长公共子串（注意与最长子序列的差别）
-    
+
     :param str1: str
         其中一个字符串参数
-        
+
     :param str2: str
         其中另外一个字符串参数
-        
+
     :return: str
         两个字符串的最长公共子串
     """
@@ -308,13 +308,13 @@ def find_longest_substring(str1, str2):
 def big_integer_add(num1, num2):
     """
     实现大整数的加法，在这里需要注意正负符号的问题。
-    
+
     :param num1: str
         字符串表示的大整数
-        
+
     :param num2: str
         字符串表示的大整数
-        
+
     :return: str
         返回最后相加的结果
     """
@@ -409,11 +409,11 @@ def big_integer_add_1(var):
     实现大整数加 1，在这个实现中是直接从字符串的
     角度进行操作，另外一个关于大整数加法的实现是从
     列表的角度进行实现
-    
+
     :param var: str
         使用字符串表示的大整数
-        
-    :return: str 
+
+    :return: str
         返回大整数加1的结果
     """
     if not isinstance(var, str):

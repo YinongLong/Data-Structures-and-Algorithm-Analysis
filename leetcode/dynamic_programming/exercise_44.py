@@ -5,6 +5,10 @@ from collections import defaultdict
 
 class Solution(object):
 
+    def isMatch_DP(self, s, p):
+        
+        pass
+
     def isMatch(self, s, p):
         """
         :type s: str

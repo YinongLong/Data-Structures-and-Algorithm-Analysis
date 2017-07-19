@@ -39,6 +39,23 @@ class Solution(object):
         maximum = self.find_maximum_subarray(0, len(nums)-1, nums)
         return maximum
 
+    def maxSubArray_DP(self, nums):
+        """
+        :type nums: List[int]
+        :rtype: int
+        """
+        assert len(nums) > 0
+        nums_len = len(nums)
+        state_array = dict()
+        state_array[0] = nums[0]
+        maximum = nums[0]
+        for i in range(1, nums_len):
+            addition = state_array[i-1] if state_array[i-1] > 0 else 0
+            state_array[i] = addition + nums[i]
+            maximum = maximum if maximum > state_array[i] else state_array[i]
+        return maximum
+
+
 numbers = [-2, 1, -3, 4, -1, 2, 1, -5, 4]
 s = Solution()
-print(s.maxSubArray(numbers))
+print(s.maxSubArray_DP(numbers))

@@ -28,15 +28,22 @@ class Solution(object):
 
         # 然后利用统计的数独board的信息来进行填数
         i = j = 0
+        locations = []
         while i < size:
             numbers = map(str, range(1, 10))
-            locations = []
+            temp_location = []
             while j < size:
                 item = board[i][j]
                 if item == '.':
-                    locations.append((i, j))
+                    temp_location.append((i, j))
                 else:
                     numbers.remove(item)
                 j += 1
-            
+            for location in temp_location:
+                r_id, c_id, b_id = self.get_location_info(*location)
+                for number in numbers:
+                    states_space = state[number]
+                    if (r_id not in states_space) and (c_id not in states_space) and (b_id not in states_space):
+                        pass
+                pass
             i += 1

@@ -54,14 +54,28 @@ class Solution(object):
 
         root = Node()
         temp_node = root
-        while len(locations) > 0:
-            loc_i, loc_j = locations.pop()
-            temp_node.generate_children(loc_i, loc_j, state)
-            if len(temp_node.children) > 0:
+        index = 0
+        generate = True
+        while index < len(locations):
+            if generate:
+                loc_i, loc_j = locations[index]
+                temp_node.generate_children(loc_i, loc_j, state)
+            if len(temp_node.candidates) > 0:
                 child = temp_node.candidates.pop()
+                # 对于挑选出的子节点，需要更新状态信息，并且在后面回撤的过程中需要删除信息
                 for info in get_location_info(child.p_i, child.p_j):
                     state[child.p_item].add(info)
                 temp_node = child
+                index += 1
+                generate = True
             else:
-                
-                pass
+                generate = False
+                index -= 1
+                # 将整个状态返回至生成该节点之前的状态
+                for info in get_location_info(temp_node.p_i, temp_node.p_j):
+                    state[temp_node.p_item].remove(info)
+                temp_node = temp_node.p
+        # 说明答案已经找到，现在只需要按照树的路径回溯回去即可
+        while temp_node.p is not None:
+            board[temp_node.p_i][temp_node.p_j] = temp_node.p_item
+            temp_node = temp_node.p

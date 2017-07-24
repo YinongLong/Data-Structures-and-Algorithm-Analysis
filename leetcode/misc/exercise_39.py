@@ -5,7 +5,7 @@ import copy
 
 class Node(object):
 
-    def __init__(self, result_list, candidates, residual, parent):
+    def __init__(self, result_list, candidates, residual, parent, depth):
         """
         初始化一个搜索树的节点
         :param result_list: List[int]
@@ -17,6 +17,7 @@ class Node(object):
         :param parent: Node
             表示生成该节点的父节点引用
         """
+        self.depth = depth
         self.result_list = result_list
         self.candidates = candidates
         self.residual = residual
@@ -31,13 +32,11 @@ class Node(object):
         temp_candidates = copy.copy(self.candidates)
         for item in self.candidates:
             temp_residual = self.residual - item
-            if temp_residual < 0:
-                continue
-            temp_list = copy.copy(self.result_list)
-            temp_list.append(item)
-            self.children.append(Node(temp_list, temp_candidates, temp_residual, self))
+            if temp_residual >= 0:
+                temp_list = copy.copy(self.result_list)
+                temp_list.append(item)
+                self.children.append(Node(temp_list, copy.copy(temp_candidates), temp_residual, self, self.depth+1))
             temp_candidates.remove(item)
-            temp_candidates = copy.copy(temp_candidates)
 
 
 class Solution(object):
@@ -48,7 +47,7 @@ class Solution(object):
         :type target: int
         :rtype: List[List[int]]
         """
-        root = Node([], candidates, target, None)
+        root = Node([], candidates, target, None, 0)
         root.generate_children()
         temp_node = root
         temp_result = []
@@ -76,9 +75,9 @@ class Solution(object):
         return [list(item) for item in result]
 
 
-# candidates = [92,71,89,74,102,91,70,119,86,116,114,106,80,81,115,99,117,93,76,77,111,110,75,104,95,112,94,73]
-# target = 310
-candidates = [2, 3, 6, 7]
-target = 7
+candidates = [92,71,89,74,102,91,70,119,86,116,114,106,80,81,115,99,117,93,76,77,111,110,75,104,95,112,94,73]
+target = 310
+# candidates = [2, 3, 6, 7]
+# target = 7
 s = Solution()
-print(s.combinationSum(candidates, target))
+print('result', s.combinationSum(candidates, target))

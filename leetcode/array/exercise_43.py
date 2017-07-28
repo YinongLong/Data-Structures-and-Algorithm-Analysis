@@ -39,7 +39,10 @@ class Solution(object):
                 if item != 0:
                     starting = True
                     str_result.append(str(item))
-        return ''.join(str_result)
+        if str_result:
+            return ''.join(str_result)
+        else:
+            return '0'
 
 
 num1 = '758'

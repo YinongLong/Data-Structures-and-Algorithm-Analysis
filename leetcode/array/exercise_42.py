@@ -25,6 +25,7 @@ class Solution(object):
                 if temp_elevation < start_elevation:
                     container.append(start_elevation - temp_elevation)
                 else:
+                    print(container)
                     trapping_water += sum(container)
                     start_elevation = temp_elevation
                     container = []
@@ -36,3 +37,8 @@ class Solution(object):
                     if residual > 0:
                         trapping_water += residual
         return trapping_water
+
+
+height = [0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1]
+s = Solution()
+print(s.trap(height))

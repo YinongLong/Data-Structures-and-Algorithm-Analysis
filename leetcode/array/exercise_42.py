@@ -4,6 +4,20 @@ from __future__ import print_function
 
 class Solution(object):
 
+    def trap_brute_force(self, height):
+        len_array = len(height)
+        if len_array < 3:
+            return 0
+
+        trapping_water = 0
+        for i in range(1, len_array - 1):
+            temp_elevation = height[i]
+            left_maximum = max(height[:i])
+            right_maximum = max(height[(i+1):])
+            minimum = min(left_maximum, right_maximum)
+            trapping_water += 0 if minimum <= temp_elevation else (minimum - temp_elevation)
+        return trapping_water
+
     def trap_two_pointers(self, height):
         if not height:
             return 0
@@ -107,4 +121,4 @@ class Solution(object):
 
 height = [0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1]
 s = Solution()
-print(s.trap_two_pointers([5, 4, 1, 2]))
+print(s.trap_brute_force([5, 4, 1, 2]))

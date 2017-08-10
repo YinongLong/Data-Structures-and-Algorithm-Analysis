@@ -18,8 +18,9 @@ class Solution(object):
 
         trapping_water = 0
 
-        left_max_elevation = height[left_pointer]
-        right_max_elevation = height[right_pointer]
+        if left_pointer < len(height) and right_pointer >= 0:
+            left_max_elevation = height[left_pointer]
+            right_max_elevation = height[right_pointer]
         left_container = []
         right_container = []
         while left_pointer < right_pointer:

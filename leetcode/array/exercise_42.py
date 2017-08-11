@@ -18,6 +18,21 @@ class Solution(object):
             trapping_water += 0 if minimum <= temp_elevation else (minimum - temp_elevation)
         return trapping_water
 
+    def trap_dynamic_programming(self, height):
+        len_array = len(height)
+        if not len_array:
+            return 0
+        left_max_arry = [height[0]]
+        for i in range(1, len_array):
+            left_max_arry.append(max(height[i], left_max_arry[i-1]))
+        right_max_array = [height[-1]]
+        for i in range(-2, -len_array-1, -1):
+            right_max_array.append(max(height[i], right_max_array[-1]))
+        trapping_water = 0
+        for i in range(len_array):
+            trapping_water += min(left_max_arry[i], right_max_array[-(i+1)]) - height[i]
+        return trapping_water
+
     def trap_two_pointers(self, height):
         if not height:
             return 0
@@ -121,4 +136,4 @@ class Solution(object):
 
 height = [0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1]
 s = Solution()
-print(s.trap_brute_force([5, 4, 1, 2]))
+print(s.trap_dynamic_programming([5,5,1,7,1,1,5,2,7,6]))

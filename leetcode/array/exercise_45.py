@@ -11,7 +11,6 @@ class Node(object):
 
 class Solution(object):
 
-
     def jump_matrix(self, nums):
         len_array = len(nums)
         state_mat = [[0] * len_array for i in range(len_array)]
@@ -24,7 +23,7 @@ class Solution(object):
         j = -1
         i = 0
         while j != (-len_array):
-            
+            pass
         for j in range(-1, -len_array-1, -1):
             for i in range(len_array):
                 if state_mat[i][j] == 1:
@@ -41,11 +40,22 @@ class Solution(object):
         :type nums: List[int]
         :rtype: int
         """
-        candidates = list()
-        candidates.append(Node(0))
-        pass
+        len_nums = len(nums)
+        state = [None] * len_nums
+        min_steps = [None] * len_nums
+        state[-1] = 0
+        for i in range(-2, -len_nums-1, -1):
+            if (nums[i] + i) >= -1:
+                state[i] = 1
+            else:
+                min_step = len_nums - 1
+                for j in range(i + nums[i], i, -1):
+                    if state[j] < min_step:
+                        min_step = state[j]
+                state[i] = min_step + 1
+        return state[0]
 
 
-nums = [2, 3, 1, 1, 4]
+nums = [4]
 s = Solution()
-s.jump_matrix(nums)
+print(s.jump(nums))

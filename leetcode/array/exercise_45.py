@@ -41,18 +41,23 @@ class Solution(object):
         using the BFS(Breadth First Search) method
         """
         len_nums = len(nums)
+        access_state = [False] * len_nums
         import collections
         candidates = collections.deque()
         candidates.append(Node(0, 0, nums[0]))
+        access_state[0] = True
         while len(candidates) > 0:
             temp_node = candidates.popleft()
-            if temp_node.idx == (len_nums - 1):
-                return temp_node.level
-            else:
-                for i in range(1, temp_node.stride+1):
-                    next_idx = temp_node.idx + i
-                    if next_idx < len_nums:
-                        candidates.append(Node(next_idx, temp_node.level+1, nums[next_idx]))
+
+            for i in range(temp_node.stride, 0, -1):
+                next_idx = temp_node.idx + i
+                next_level = temp_node.level + 1
+                if next_idx == (len_nums - 1):
+                    return next_level
+                if (next_idx < len_nums) and (not access_state[next_idx]):
+                    candidates.append(Node(next_idx, temp_node.level+1, nums[next_idx]))
+                    access_state[next_idx] = True
+        return 0
 
 
     def jump(self, nums):

@@ -30,13 +30,14 @@ class Solution(object):
                     x = x if x < 0 else x + 1
                     y = y if y > 0 else y - 1
                 cur_i, cur_j = i, j
-                for _ in range(5):
+                for _ in range(3):
                     next_x, next_y = -y, x
                     next_i, next_j = self._get_position(radius, odd, next_x, next_y)
                     matrix[cur_i][cur_j], matrix[next_i][next_j] = matrix[next_i][next_j], matrix[cur_i][cur_j]
                     state_mat[cur_i][cur_j] = True
                     cur_i, cur_j = next_i, next_j
                     x, y = next_x, next_y
+                state_mat[cur_i][cur_j] = True
 
 
 matrix = [[1, 2], [3, 4]]

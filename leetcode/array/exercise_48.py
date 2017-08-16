@@ -19,7 +19,7 @@ class Solution(object):
         """
         len_mat = len(matrix)
         state_mat = [[False] * len_mat for _ in range(len_mat)]
-        odd = False if len_mat % 2 else True
+        odd = True if len_mat % 2 else False
         radius = len_mat / 2
         for i in range(len_mat):
             for j in range(len_mat):
@@ -30,7 +30,7 @@ class Solution(object):
                     x = x if x < 0 else x + 1
                     y = y if y > 0 else y - 1
                 cur_i, cur_j = i, j
-                for _ in range(4):
+                for _ in range(5):
                     next_x, next_y = -y, x
                     next_i, next_j = self._get_position(radius, odd, next_x, next_y)
                     matrix[cur_i][cur_j], matrix[next_i][next_j] = matrix[next_i][next_j], matrix[cur_i][cur_j]

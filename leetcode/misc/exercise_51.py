@@ -11,75 +11,94 @@
 from __future__ import print_function
 
 
-def generate_children(state):
-    """
-    根据棋盘的状态生成下一个可以放置“皇后”的位置
-    """
-    len_state = len(state)
-    children = []
-    for i in range(len_state):
-        for j in range(len_state):
-            if state[i][j] > 0:
-                continue
-            else:
-                children.append((i, j))
-    return children
-
-
-def update_board_state(state, x, y, plus=True):
-    """
-    更新棋盘的状态
-    """
-    unit = 1 if plus else -1
-    length = len(state)
-    # 更新十字交叉位置的棋盘状态
-    for i in range(length):
-        state[i][y] += unit
-        state[x][i] += unit
-    # 更新X交叉位置的棋盘状态
-    for i in range(4):
-        start_x, start_y = x, y
-        x_flag = i / 2
-        y_flag = i % 2
-        x_step, y_step = pow(-1, x_flag), pow(-1, y_flag)
-        while (0 <= start_x < length) and (0 <= start_y < length):
-            state[start_x][start_y] += unit
-            start_x += x_step
-            start_y += y_step
-
-
 class Node(object):
 
-    def __init__(self, parent, board_state):
+    def __init__(self, x, y, parent, positions, level):
+        self.x = x
+        self.y = y
         self.parent = parent
-        self.board_state = board_state
-        self.length = len(board_state)
-        self.children = generate_children(board_state)
+        self.positions = positions
+        self.level = level
+        self.idx = 0
 
     def empty(self):
-        return False if self.children else True
+        return False if self.positions else True
 
     def next(self):
-        x, y = self.children.pop()
-        update_board_state(self.board_state, x, y)
-        return self.board_state
+        x, y = self.positions[self.idx]
+        self.idx += 1
+        children = []
+        for temp_x, temp_y in self.positions:
+            if temp_x == x or temp_y == y:
+                continue
+            if abs((temp_y - y) / (temp_x - x)) == 1:
+                continue
+            children.append((temp_x, temp_y))
+        return (x, y), children
+
 
 class Solution(object):
 
+    def generate_solution(self, tree_node):
+        solution = []
+        while tree_node:
+            solution.append((tree_node.x, tree_node.y))
+            tree_node = tree_node.parent
+        return solution
+
     def solveNQueens(self, n):
         """
+        对于这个
         :type n: int
         :rtype: List[List[str]]
         """
-        # 初始化棋盘状态，每一个位置的数字代表该位置被多少个“皇后”访问到
-        initial_state = [[0] * n for _ in range(n)]
-        root = Node(None, initial_state)
+        positions = []
+        for i in range(n):
+            for j in range(n):
+                positions.append((i, j))
+        root = Node(None, positions, 0)
         temp_node = root
+        solutions = []
         while temp_node:
-            if temp_node.empty():
-                
-                pass
+            if temp_node.level == n:
+                solutions.append(self.generate_solution(temp_node))
+                temp_node = temp_node.parent
+                continue
+            if not temp_node.positions:
+                temp_node = temp_node.parent
             else:
-                pass
-            pass
+                (next_x, next_y), children = temp_node.next()
+                temp_node = Node(temp_node, children, temp_node.level + 1)
+        pass
+
+class ChessBoard(object):
+    """
+    棋盘状态类对象
+    """
+
+    def __init__(self, width):
+        """
+        :type width: int
+            棋盘的宽度大小
+        """
+        self.width = width
+        self.placed_chess = []
+        self.next_x = 0
+        self.next_y = 0
+
+    def _next_position(self):
+        """
+        移动到棋盘的下一个位置
+        """
+        self.next_x += 1
+        if self.next_x == self.width:
+            self.next_x %= self.width
+            self.next_y += 1
+            if self.next_y == self.width
+                return False
+        return True
+
+    def place_next_chess(self):
+        x, y = self.next_x, self.next_y
+
         pass

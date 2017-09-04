@@ -14,19 +14,43 @@ from __future__ import print_function
 class Node(object):
 
     def __init__(self, x, y, parent, positions, level):
+        """
+        :type x: int
+            生成该结点的x坐标
+        :type y: int
+            生成该结点的y坐标
+        :type parent: Node
+            生成该结点的双亲结点的引用
+        :type positions: List
+            该结点可以使用的有效位置元组的列表
+        :type level: int
+            记录该结点在树中的高度，代表已经在棋盘上放置的棋子的数目
+        """
         self.x = x
         self.y = y
+        self.have_children = False
         self.parent = parent
         self.positions = positions
         self.level = level
         self.idx = 0
+        if self.positions:
+            self.have_children = True
 
     def empty(self):
-        return False if self.positions else True
+        """
+        返回时候该结点还存在可以用来生成孩子结点的有效位置
+        """
+        return not self.have_children
 
     def next(self):
+        """
+        生成下一个用于生成孩子结点的位置以及有效的放置棋子的位置
+        """
         x, y = self.positions[self.idx]
         self.idx += 1
+        if self.idx == len(self.positions):
+            self.have_children = False
+
         children = []
         for temp_x, temp_y in self.positions:
             if temp_x == x or temp_y == y:
@@ -40,6 +64,9 @@ class Node(object):
 class Solution(object):
 
     def generate_solution(self, tree_node):
+        """
+        根据一个搜索树的叶子结点生成一个解法的放置棋子的位置元组列表
+        """
         solution = []
         while tree_node:
             solution.append((tree_node.x, tree_node.y))
@@ -48,57 +75,38 @@ class Solution(object):
 
     def solveNQueens(self, n):
         """
-        对于这个
         :type n: int
         :rtype: List[List[str]]
         """
+        # 根结点可以放置的位置是整个棋盘上的所有位置
         positions = []
         for i in range(n):
             for j in range(n):
                 positions.append((i, j))
-        root = Node(None, positions, 0)
+        # 生成树的根结点
+        root = Node(None, None, None, positions, 0)
         temp_node = root
         solutions = []
         while temp_node:
-            if temp_node.level == n:
+            if temp_node.level == n:  # 说明n个位置都已经放置棋子，则返回结果
                 solutions.append(self.generate_solution(temp_node))
                 temp_node = temp_node.parent
                 continue
-            if not temp_node.positions:
+            if temp_node.empty():  # 代表该结点不能再生成子结点
                 temp_node = temp_node.parent
-            else:
+            else:  # 代表该结点还可以生成子结点
                 (next_x, next_y), children = temp_node.next()
-                temp_node = Node(temp_node, children, temp_node.level + 1)
-        pass
+                temp_node = Node(next_x, next_y, temp_node, children, temp_node.level + 1)
 
-class ChessBoard(object):
-    """
-    棋盘状态类对象
-    """
+        result = []
+        for solution in solutions:
+            chess_board = [['.'] * n for _ in range(n)]
+            for x, y in solution:
+                chess_board[x][y] = 'Q'
+            chess_board = [''.join(item) for item in chess_board]
+            result.append(chess_board)
+        return result
 
-    def __init__(self, width):
-        """
-        :type width: int
-            棋盘的宽度大小
-        """
-        self.width = width
-        self.placed_chess = []
-        self.next_x = 0
-        self.next_y = 0
 
-    def _next_position(self):
-        """
-        移动到棋盘的下一个位置
-        """
-        self.next_x += 1
-        if self.next_x == self.width:
-            self.next_x %= self.width
-            self.next_y += 1
-            if self.next_y == self.width
-                return False
-        return True
-
-    def place_next_chess(self):
-        x, y = self.next_x, self.next_y
-
-        pass
+s = Solution()
+print(s.solveNQueens(4))

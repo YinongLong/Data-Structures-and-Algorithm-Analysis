@@ -32,7 +32,6 @@ class Node(object):
         self.parent = parent
         self.positions = positions
         self.level = level
-        self.idx = 0
         if self.positions:
             self.have_children = True
 
@@ -46,16 +45,15 @@ class Node(object):
         """
         生成下一个用于生成孩子结点的位置以及有效的放置棋子的位置
         """
-        x, y = self.positions[self.idx]
-        self.idx += 1
-        if self.idx == len(self.positions):
+        x, y = self.positions.pop()
+        if len(self.positions) == 0:
             self.have_children = False
 
         children = []
         for temp_x, temp_y in self.positions:
             if temp_x == x or temp_y == y:
                 continue
-            if abs((temp_y - y) / (temp_x - x)) == 1:
+            if abs(abs((temp_y - y) * 1.0 / (temp_x - x)) - 1) < 0.0001:
                 continue
             children.append((temp_x, temp_y))
         return (x, y), children
@@ -68,7 +66,7 @@ class Solution(object):
         根据一个搜索树的叶子结点生成一个解法的放置棋子的位置元组列表
         """
         solution = []
-        while tree_node:
+        while tree_node.parent:
             solution.append((tree_node.x, tree_node.y))
             tree_node = tree_node.parent
         return solution
@@ -109,4 +107,4 @@ class Solution(object):
 
 
 s = Solution()
-print(s.solveNQueens(4))
+print(s.solveNQueens(8))

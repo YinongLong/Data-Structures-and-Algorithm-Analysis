@@ -8,8 +8,10 @@ class Solution(object):
         for idx, item in enumerate(array):
             if item % 2 == 1:
                 start += 1
-            else:
-                
-                pass
-            pass
-        pass
+                if start != idx:
+                    array[start], array[idx] = array[idx], array[start]
+
+s = Solution()
+array = [1,2,3,4,5,6,7]
+s.reOrderArray(array)
+print(array)

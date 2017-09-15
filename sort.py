@@ -180,14 +180,12 @@ def shell_sort(array, steps=None):
     for step in steps:
         for i in range(step, len_array):
             temp_val = array[i]
-            for j in range(i, 0, -step):
+            for j in range(i, -1, -step):
                 if (j - step) >= 0 and (array[j - step] > temp_val):
                     array[j] = array[j - step]
                 else:
                     array[j] = temp_val
                     break
-            else:
-                array[0] = temp_val
 
 
 def insert_sort(array):
@@ -312,7 +310,7 @@ def main():
         # print(copy_array, '\n')
         result.append(copy_array)
     for i in range(1, len(result)):
-        if result[i] != result[i]:
+        if result[i] != result[i-1]:
             print('Sort Algorithms %s and %s have problems!' % (str(sort_algorithms[i - 1]), str(sort_algorithms[i])))
     print('Sort Algorithms are all right!')
 

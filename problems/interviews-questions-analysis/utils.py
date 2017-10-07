@@ -14,3 +14,11 @@ class TreeNode(object):
         self.val = x
         self.left = None
         self.right = None
+
+
+class RandomListNode(object):
+
+    def __init__(self, x):
+        self.label = x
+        self.next = None
+        self.random = None
